@@ -287,3 +287,7 @@ class AwaitableContext:
             return self._return_value
 
         return _inner_coro().__await__()
+
+
+def add_namespace(name: str, namespace: str) -> str:
+    return f"{namespace}:{name}"

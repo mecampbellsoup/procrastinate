@@ -1,10 +1,10 @@
 import functools
-from typing import TYPE_CHECKING, Any, Callable, List, Optional
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional
 
-from procrastinate import jobs, protocols, retry
+from procrastinate import exceptions, jobs, retry, utils
 
 if TYPE_CHECKING:
-    from procrastinate import app, tasks
+    from procrastinate import tasks
 
 
 class Blueprint:
@@ -63,7 +63,7 @@ class Blueprint:
         to_add = {}
         if task.name in self.tasks:
             raise exceptions.TaskAlreadyRegistered(
-                f"A task called {task.name} was already registered."
+                f"A task named {task.name} was already registered"
             )
         to_add[task.name] = task
 
@@ -77,10 +77,41 @@ class Blueprint:
 
         self.tasks.update(to_add)
 
-    def register(self, app: "app.App") -> None:
-        for task in self.tasks.values():
-            task.app = app
-            app._register(task)
+
+    def add_tasks_from(self, blueprint: "Blueprint", *, namespace: str) -> None:
+        """
+        Copies over all tasks from a different blueprint, prefixing their names
+        with the given namespace (using ``:`` as namespace separator).
+
+        Parameters
+        ----------
+        blueprint :
+            Blueprint to copy tasks from
+        namespace :
+            All task names (but not aliases) will be prefixed by this name,
+            uniqueness will be enforced.
+
+        Raises
+        ------
+        TaskAlreadyRegistered:
+            When trying to use a namespace that has already been used before
+        """
+        # Compute new task names
+        new_tasks = {
+            utils.add_namespace(name=name, namespace=namespace): task
+            for name, task in blueprint.tasks.items()
+        }
+        if set(self.tasks) & set(new_tasks):
+            raise exceptions.TaskAlreadyRegistered(
+                f"A namespace named {namespace} was already registered"
+            )
+        # Modify existing tasks and other blueprint to add the namespace
+        for task in set(blueprint.tasks.values()):
+            task.add_namespace(namespace)
+        blueprint.tasks = new_tasks
+
+        # Finally, add the namespaced tasks to this namespace
+        self.tasks.update(new_tasks)
 
     def task(
         self,
