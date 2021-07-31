@@ -7,7 +7,7 @@ if TYPE_CHECKING:
     from procrastinate import app, tasks
 
 
-class Blueprint(protocols.TaskCreator):
+class Blueprint:
     """
     A Blueprint provides a way to declare tasks that can be registered on an
     `App` later::
