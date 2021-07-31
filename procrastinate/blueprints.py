@@ -38,9 +38,9 @@ class Blueprint:
 
     Raises
     ------
-    TaskNotRegistered:
+    UnboundTaskError:
         Calling a blueprint task before the it is bound to an `App` will raise a
-        `TaskNotRegistered` error::
+        `UnboundTaskError` error::
 
             blueprint = Blueprint()
 
@@ -53,7 +53,7 @@ class Blueprint:
 
             Traceback (most recent call last):
                 File "..."
-            `TaskNotRegistered`: ...
+            `UnboundTaskError`: ...
     """
 
     def __init__(self):
