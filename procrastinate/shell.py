@@ -1,11 +1,16 @@
 import cmd
+from pprint import pprint
 from typing import Dict
 
 from procrastinate import jobs, manager, utils
 
 
 def parse_argument(arg: str) -> Dict[str, str]:
-    splitted_args = (item.partition("=") for item in arg.split())
+    try:
+        splitted_args = (item.partition("=") for item in arg.split())
+    except AttributeError as e:
+        pprint(e)
+        raise e
     return {key: value for key, _, value in splitted_args}
 
 

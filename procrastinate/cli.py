@@ -4,6 +4,7 @@ import datetime
 import json
 import logging
 import os
+from pprint import pprint
 import sys
 from typing import Any, Callable, Dict, Optional, Union
 
@@ -205,7 +206,11 @@ def worker_(app: procrastinate.App, queues: str, **kwargs):
     Launch a worker, listening on the given queues (or all queues).
     Values default to App.worker_defaults and then App.run_worker() defaults values.
     """
-    queue_list = [q.strip() for q in queues.split(",")] if queues else None
+    try:
+        queue_list = [q.strip() for q in queues.split(",")] if queues else None
+    except AttributeError as e:
+        pprint(e)
+        raise e
     if queue_list is None:
         queue_names = "all queues"
     else:

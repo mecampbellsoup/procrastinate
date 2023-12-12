@@ -1,5 +1,6 @@
 import itertools
 import pathlib
+from pprint import pprint
 import sys
 import types
 from importlib import abc, machinery
@@ -37,7 +38,11 @@ class ProcrastinateMigrationsImporter(abc.MetaPathFinder, abc.Loader):
             module.__path__.append(VIRTUAL_PATH)  # type: ignore
             return
 
-        migration_cls = self.migrations[module.__name__.split(".")[-1]]
+        try:
+            migration_cls = self.migrations[module.__name__.split(".")[-1]]
+        except AttributeError as e:
+            pprint(e)
+            raise e
         module.Migration = migration_cls  # type: ignore
 
     def find_spec(
@@ -79,7 +84,11 @@ def list_migration_files() -> Iterable[Tuple[str, str]]:
 
 
 def version_from_string(version_str) -> Tuple:
-    return tuple(int(e) for e in version_str.split("."))
+    try:
+        return tuple(int(e) for e in version_str.split("."))
+    except AttributeError as e:
+        pprint(e)
+        raise e
 
 
 @attr.dataclass(frozen=True)
@@ -93,7 +102,11 @@ class ProcrastinateMigration:
     @classmethod
     def from_file(cls, filename: str, contents: str) -> "ProcrastinateMigration":
         path = pathlib.PurePath(filename)
-        version_str, index, name = path.stem.split("_", 2)
+        try:
+            version_str, index, name = path.stem.split("_", 2)
+        except AttributeError as e:
+            pprint(e)
+            raise e
         return cls(
             filename=path.name,
             name=name,
